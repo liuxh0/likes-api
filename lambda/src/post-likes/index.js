@@ -1,11 +1,14 @@
 const aws = require('aws-sdk');
 const dynamodb = new aws.DynamoDB({ region: 'eu-central-1' });
+const tableName = process.env.TABLE_NAME;
 
-exports.handler = async () => {
-  const a = await dynamodb.updateItem({
-    TableName: 'Likes-Stats',
-    Key: { 'key': { S: 'total' }},
-    UpdateExpression: 'SET #value = #value + :val',
+exports.lambdaHandler = async () => {
+  await dynamodb.updateItem({
+    TableName: tableName,
+    Key: {
+      'key': { S: 'total' }
+    },
+    UpdateExpression: 'ADD #value :val',
     ExpressionAttributeNames: {
       '#value': 'value'
     },

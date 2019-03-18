@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: ''
+
+Globals:
+  Api:
+    EndpointConfiguration: REGIONAL
+  Function:
+    Runtime: nodejs8.10
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref KeyValueTable
+
+Resources:
+  KeyValueTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: key
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+  GetLikesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/src/get-likes
+      Handler: index.lambdaHandler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref KeyValueTable
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /likes
+            Method: get
+  PostLikesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/src/post-likes
+      Handler: index.lambdaHandler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref KeyValueTable
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /likes
+            Method: post
